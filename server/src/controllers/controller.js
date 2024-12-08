@@ -1,24 +1,9 @@
 const User = require('../models/user.model');
-const Join = require('../models/join.model');
 const Calendar = require('../models/calendar.model');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
 
 
-// Create a nodemailer transporter for Outlook
-const transporter = nodemailer.createTransport({
-  host: 'smtp.office365.com', // Outlook SMTP server
-  port: 587, // Outlook SMTP port (587 or 465)
-  secure: false, // TLS requires secure connection set to false
-  auth: {
-    user: process.env.EMAIL_USERNAME, // Your Outlook email address
-    pass: process.env.EMAIL_PASSWORD // Your Outlook email password
-  },
-  tls: {
-    rejectUnauthorized: false // Ignore SSL certificate verification
-  }
-});
 
 
 
@@ -133,55 +118,21 @@ controller.verifyAdmin = async (req, res, next) => {
 };
 
 // Function to generate a random join code
-function generateJoinCode(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let code = '';
-  for (let i = 0; i < length; i++) {
-    code += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return code;
-}
+
 
 // Controller to send join code via email
-controller.sendJoinCodeByEmail = async (req, res) => {
-  const receiver = req.body.receiver;
-  const joinkey = generateJoinCode(6);
 
-  try {
-    const mailOptions = {
-      from: process.env.EMAIL_USERNAME,
-      to: receiver,
-      subject: 'Your Join Code',
-      text: `Your join code is: ${joinkey}`
-    };
-
-    await transporter.sendMail(mailOptions);
-    const newJoin = new Join({ key: joinkey });
-    await newJoin.save();
-
-    res.send({ message: 'Join code sent successfully' });
-  } catch (error) {
-    console.error('Error sending join code:', error);
-    res.status(500).send('An error occurred while sending the join code');
-  }
-};
 
 // Controller to handle user signup
 controller.signUp = async (req, res) => {
   try {
-    const { join, email, password, firstName, lastName, dateNais, mobile } = req.body;
+    const {  email, password, firstName, lastName, dateNais, mobile } = req.body;
 
-    if (!join || !email || !password || !firstName || !lastName || !dateNais || !mobile) {
+    if ( !email || !password || !firstName || !lastName || !dateNais || !mobile) {
       return res.status(400).send({ message: 'All fields are required' });
     }
 
-    const joined = await Join.findOne({ key: join });
-    if (!joined) {
-      return res.status(400).send({ message: 'Invalid join code' });
-    }
-
-    // Remove the join document from the database
-    await Join.findOneAndDelete({ key: join });
+  
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {

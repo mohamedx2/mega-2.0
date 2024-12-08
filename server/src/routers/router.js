@@ -14,7 +14,7 @@ routes.post('/user', controller.verifyToken, async (req, res) => {
 routes.delete('/users/:id', controller.verifyAdmin, controller.deleteUser); // Route to delete a user
 routes.put('/users/:id', controller.verifyToken, controller.updateUser); // Route to update a user
 routes.post('/admin', controller.verifyAdmin, controller.getAllUsers); // Route to get all users by admin
-routes.post('/join', controller.sendJoinCodeByEmail); // Route to send join code via email
+
 
 // Route to create a new calendar entry
 routes.post('/calendar',controller.verifyToken, controller.createCalendar);
